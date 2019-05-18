@@ -26,20 +26,22 @@ public class Mouse : MonoBehaviour
     public float forwardVelocity;
     public float rotationAngle;
 
+    public Action<GameObject, string> OnHit;
+
     private SpriteRenderer sprite;
     private float rotationDir;
     private bool directionChosen;
 
-    private void Start()
+    private void Awake()
     {
-        Random.InitState(DateTime.Now.Millisecond);
         circleResults = new Collider2D[2];
         sprite = GetComponent<SpriteRenderer>();
         directionChosen = false;
         validHits = new bool[3];
+        SetState(State.STOPPED);
     }
 
-    private void SetState(State newState)
+    public void SetState(State newState)
     {
         state = newState;
     }
@@ -56,7 +58,7 @@ public class Mouse : MonoBehaviour
     bool validHit;
     public void UpdateState()   
     {
-        if (state == State.STOPPED)
+        if (state == State.STOPPED || state == State.REMOVED)
             return;
 
         for(int i = 0; i < sensors.Length; i++)
@@ -77,13 +79,17 @@ public class Mouse : MonoBehaviour
                         SetState(State.ROTATING);
                         validHit = true;
                     }
-                    else if (circleResults[j].CompareTag("Target"))
+                    else if (i == 1 && circleResults[j].CompareTag("Target"))
                     {
-                        if (i == 1)
-                        {
-                            SetState(State.STOPPED);
-                            validHit = true;
-                        }
+                        SetState(State.REMOVED);
+                        validHit = true;
+                        OnHit?.Invoke(gameObject, "Target");
+                    }
+                    else if (i == 1 && circleResults[j].CompareTag("Trap"))
+                    {
+                        SetState(State.REMOVED);
+                        validHit = true;
+                        OnHit?.Invoke(gameObject, "Trap");
                     }
                     if (validHit) break;
                 }
@@ -120,8 +126,6 @@ public class Mouse : MonoBehaviour
     public void Act()
     {
         if(!act) return;
-        //DrawRay(transform.position + sprite.sprite.bounds.extents.y * transform.up, 
-        //    transform.up * rayDistance, Color.magenta);
 
         switch (state)
         {

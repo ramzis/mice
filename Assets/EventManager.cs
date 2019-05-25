@@ -1,13 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 
-public static class EventManager
+public class EventManager
 {
-    private static Dictionary<string, List<Action<dynamic>>> dc;
-    static EventManager()
+    private static EventManager eventManagerInstance = null;
+    public static EventManager instance
     {
-        dc = new Dictionary<string, List<Action<dynamic>>>();
+        get
+        {
+            if (eventManagerInstance == null)
+            {
+                eventManagerInstance = new EventManager();
+            }
+
+            return eventManagerInstance;
+        }
     }
+
+    private static Dictionary<string, List<Action<dynamic>>> dc = 
+        new Dictionary<string, List<Action<dynamic>>>();
 
     public static void Subscribe(string eventName, Action<dynamic> action)
     {
@@ -30,5 +41,10 @@ public static class EventManager
                 f?.Invoke(payload);
             }
         }
+    }
+
+    public static void Purge()
+    {
+        dc?.Clear();
     }
 }

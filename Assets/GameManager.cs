@@ -1,19 +1,8 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using static UnityEngine.Debug;
 using Random = UnityEngine.Random;
-
-
-public sealed partial class Events
-{
-    public static readonly string UNPAUSE = "UNPAUSE";
-    public static readonly string PAUSE = "PAUSE";
-    public static readonly string OBJECTIVE_FAILED = "OBJECTIVE_FAILED";
-    public static readonly string OBJECTIVE_COMPLETED = "OBJECTIVE_COMPLETED";
-    public static readonly string TIME_OVER = "TIME_OVER";
-}
 
 public class GameManager : MonoBehaviour
 {
@@ -34,7 +23,7 @@ public class GameManager : MonoBehaviour
     public TimeState timeState;
     public ObjectiveState objectiveState;
 
-    public int levelTime;
+    public float levelTime;
     public int targetCount;
     public int activeAgentCount;
 
@@ -59,7 +48,7 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKeyDown(KeyCode.Escape) && objectiveState == ObjectiveState.INPROGRESS)
         {
             switch (timeState)
             {
@@ -92,31 +81,32 @@ public class GameManager : MonoBehaviour
     {
         var mice = FindObjectsOfType<Mouse>();
         foreach (var mouse in mice)
-        {
             mouse.OnHit -= OnAgentHit;
-        }
+        EventManager.Purge();
     }
 
     private void OnAgentHit(GameObject agent, string hit)
     {
-        if (hit == "Target" && objectiveState != ObjectiveState.FAILED)
+        if (objectiveState == ObjectiveState.FAILED)
+            return;
+
+        switch (hit)
         {
-            agent.SetActive(false);
-            targetCount -= 1;
-            activeAgentCount -= 1;
-            if (targetCount <= 0 && objectiveState != ObjectiveState.COMPLETED)
-            {
-                SetObjectiveState(ObjectiveState.COMPLETED);
-            }
-        }
-        else if (hit == "Trap" && objectiveState != ObjectiveState.FAILED)
-        {
-            agent.SetActive(false);
-            activeAgentCount -= 1;
-            if (activeAgentCount < targetCount && objectiveState != ObjectiveState.COMPLETED)
-            {
-                SetObjectiveState(ObjectiveState.FAILED);
-            }
+            case "Target":
+                agent.SetActive(false);
+                targetCount -= 1;
+                activeAgentCount -= 1;
+                if (targetCount <= 0 && objectiveState != ObjectiveState.COMPLETED)
+                    SetObjectiveState(ObjectiveState.COMPLETED);
+                break;
+            case "Trap":
+                agent.SetActive(false);
+                activeAgentCount -= 1;
+                if (activeAgentCount < targetCount && objectiveState == ObjectiveState.INPROGRESS)
+                    SetObjectiveState(ObjectiveState.FAILED);
+                break;
+            default:
+                break;
         }
     }
 
@@ -129,6 +119,7 @@ public class GameManager : MonoBehaviour
         {
             if (objectiveState == ObjectiveState.INPROGRESS)
                 SetObjectiveState(ObjectiveState.FAILED);
+            Log("Time over");
         });
 
         EventManager.Subscribe(Events.OBJECTIVE_FAILED, _ =>
@@ -137,14 +128,21 @@ public class GameManager : MonoBehaviour
             Log("Objective failed");
         });
 
-        EventManager.Subscribe(Events.PAUSE, _ =>
+        EventManager.Subscribe(Events.OBJECTIVE_COMPLETED, _ =>
         {
-            SetAgentsStopped(true);
+            Log("Objective completed");
         });
 
-        EventManager.Subscribe(Events.UNPAUSE, _ =>
+        EventManager.Subscribe(Events.PAUSED, _ =>
+        {
+            SetAgentsStopped(true);
+            Log("Paused");
+        });
+
+        EventManager.Subscribe(Events.UNPAUSED, _ =>
         {
             SetAgentsStopped(false);
+            Log("Unpaused");
         });
     }
 
@@ -160,9 +158,9 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public int GetLevelTime(int level)
+    public float GetLevelTime(int level)
     {
-        return 30;
+        return 30f;
     }
 
     public int GetLevelTargetCount(int level)
@@ -198,11 +196,12 @@ public class GameManager : MonoBehaviour
         switch (timeState)
         {
             case TimeState.PAUSED:
-                EventManager.Emit(Events.PAUSE);
+                EventManager.Emit(Events.PAUSED);
                 break;
             case TimeState.RUNNING:
                 if (prev == TimeState.PAUSED)
-                    EventManager.Emit(Events.UNPAUSE);
+                    EventManager.Emit(Events.UNPAUSED);
+                EventManager.Emit(Events.RUNNING);
                 break;
             case TimeState.OVER:
                 EventManager.Emit(Events.TIME_OVER);
@@ -218,8 +217,10 @@ public class GameManager : MonoBehaviour
         switch (objectiveState)
         {
             case ObjectiveState.INPROGRESS:
+                EventManager.Emit(Events.OBJECTIVE_INPROGRESS);
                 break;
             case ObjectiveState.COMPLETED:
+                EventManager.Emit(Events.OBJECTIVE_COMPLETED);
                 break;
             case ObjectiveState.FAILED:
                 EventManager.Emit(Events.OBJECTIVE_FAILED);
@@ -235,8 +236,8 @@ public class GameManager : MonoBehaviour
         {
             if(timeState == TimeState.RUNNING)
             {
-                yield return new WaitForSeconds(1f);
-                levelTime -= 1;
+                levelTime -= Time.deltaTime;
+                yield return new WaitForEndOfFrame();
                 if(levelTime <= 0)
                     SetTimeState(TimeState.OVER);
             }

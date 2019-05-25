@@ -20,7 +20,6 @@ public class Mouse : MonoBehaviour
     public float rayCircleRadius;
     public Vector2[] sensors;
     public Vector2 sensorOffset;
-    public bool act = true;
 
     public LayerMask hitLayerMask;
     public float forwardVelocity;
@@ -28,14 +27,12 @@ public class Mouse : MonoBehaviour
 
     public Action<GameObject, string> OnHit;
 
-    private SpriteRenderer sprite;
     private float rotationDir;
     private bool directionChosen;
 
     private void Awake()
     {
         circleResults = new Collider2D[2];
-        sprite = GetComponent<SpriteRenderer>();
         directionChosen = false;
         validHits = new bool[3];
         SetState(State.STOPPED);
@@ -125,8 +122,6 @@ public class Mouse : MonoBehaviour
 
     public void Act()
     {
-        if(!act) return;
-
         switch (state)
         {
             case State.STOPPED:

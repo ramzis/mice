@@ -26,6 +26,7 @@ public class GameManager : MonoBehaviour
     public float levelTime;
     public int targetCount;
     public int activeAgentCount;
+    public int completeTargetCount;
 
     public Mouse[] mice;
 
@@ -70,6 +71,7 @@ public class GameManager : MonoBehaviour
     {
         mice = FindObjectsOfType<Mouse>();
         activeAgentCount = mice.Length;
+        completeTargetCount = 0;
         InitLevelStates();
         levelTime = GetLevelTime(0);
         targetCount = GetLevelTargetCount(0);
@@ -95,6 +97,7 @@ public class GameManager : MonoBehaviour
             case "Target":
                 agent.SetActive(false);
                 targetCount -= 1;
+                completeTargetCount += 1;
                 activeAgentCount -= 1;
                 if (targetCount <= 0 && objectiveState != ObjectiveState.COMPLETED)
                     SetObjectiveState(ObjectiveState.COMPLETED);
@@ -126,11 +129,28 @@ public class GameManager : MonoBehaviour
         {
             SetAgentsStopped(true);
             Log("Objective failed");
+            float percentage = completeTargetCount / GetLevelTargetCount(0);
+            int stars = 0;
+            UIManager.Instance.UpdateCanvas(
+                "Oh no! You need to save more mice!",
+                $"You saved {completeTargetCount} / {GetLevelTargetCount(0)} mice",
+                stars);
+            UIManager.Instance.ToggleCanvas(true);
         });
 
         EventManager.Subscribe(Events.OBJECTIVE_COMPLETED, _ =>
         {
             Log("Objective completed");
+            float percentage = completeTargetCount / GetLevelTargetCount(0);
+            int stars;
+            if (percentage <= 0.3f) stars = 1;
+            else if (percentage <= 0.8f) stars = 2;
+            else stars = 3;
+            UIManager.Instance.UpdateCanvas(
+                "Level completed!",
+                $"You saved {completeTargetCount} / {GetLevelTargetCount(0)} mice",
+                stars);
+            UIManager.Instance.ToggleCanvas(true);
         });
 
         EventManager.Subscribe(Events.PAUSED, _ =>

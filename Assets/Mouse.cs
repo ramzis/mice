@@ -6,7 +6,7 @@ using static UnityEngine.Debug;
 using Random = UnityEngine.Random;
 
 [DisallowMultipleComponent]
-public class Mouse : MonoBehaviour
+public class Mouse : Agent
 {
     public enum State
     {
@@ -25,8 +25,6 @@ public class Mouse : MonoBehaviour
     public float forwardVelocity;
     public float rotationAngle;
 
-    public Action<GameObject, string> OnHit;
-
     private float rotationDir;
     private bool directionChosen;
 
@@ -35,7 +33,7 @@ public class Mouse : MonoBehaviour
         circleResults = new Collider2D[2];
         directionChosen = false;
         validHits = new bool[3];
-        SetState(State.STOPPED);
+        //SetState(State.STOPPED);
     }
 
     public void SetState(State newState)
@@ -53,7 +51,7 @@ public class Mouse : MonoBehaviour
     bool[] validHits;
     int circleHits;
     bool validHit;
-    public void UpdateState()   
+    public override void UpdateState()   
     {
         if (state == State.STOPPED || state == State.REMOVED)
             return;
@@ -120,7 +118,7 @@ public class Mouse : MonoBehaviour
         }
     }
 
-    public void Act()
+    public override void Act()
     {
         switch (state)
         {

@@ -11,4 +11,5 @@ public sealed class Events
     public static readonly string RUNNING = "RUNNING";
     public static readonly string PAUSED = "PAUSED";
     public static readonly string UNPAUSED = "UNPAUSED";
+    public static readonly string AGENT_HIT = "AGENT_HIT";
 }

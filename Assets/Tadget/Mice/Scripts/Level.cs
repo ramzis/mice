@@ -11,10 +11,21 @@ public class Level : MonoBehaviour
 {
     public LevelState state;
     public LevelAgents<Mouse> agents;
+    public UIManager ui;
 
     public float time;
     public int targetCount;
     public int completeTargetCount;
+
+    private void OnEnable()
+    {
+        SetEventRules();
+    }
+
+    private void OnDisable()
+    {
+        Purge();
+    }
 
     private void Awake()
     {
@@ -23,7 +34,6 @@ public class Level : MonoBehaviour
 
     private void Start()
     {
-        // TODO inject state to input manager
         state = new LevelState();
         agents = new LevelAgents<Mouse>();
         gameObject.AddComponent<InputManager>().Init(state);
@@ -32,7 +42,6 @@ public class Level : MonoBehaviour
         targetCount = GetLevelTargetCount(0);
         completeTargetCount = 0;
 
-        SetEventRules();
         state.BeginObjective();
         StartCoroutine(Counter());
     }
@@ -45,14 +54,6 @@ public class Level : MonoBehaviour
         }
     }
 
-    private void OnDisable()
-    {
-        var mice = GameObject.FindObjectsOfType<Mouse>();
-        foreach (var mouse in mice)
-            mouse.OnHit -= OnAgentHit;
-        Purge();
-    }
-
     private void OnAgentHit(GameObject agent, string hit)
     {
         if (state.objectiveState == ObjectiveState.FAILED)
@@ -61,18 +62,15 @@ public class Level : MonoBehaviour
         switch (hit)
         {
             case "Target":
-                agent.SetActive(false);
+                agents.Remove(agent);
                 targetCount -= 1;
                 completeTargetCount += 1;
-                agents.activeAgentCount -= 1;
-                // TODO: think of "decorator" for changing state to same state
-                if (targetCount <= 0 && state.objectiveState != ObjectiveState.COMPLETED)
+                if (targetCount == 0)
                     state.CompleteObjective();
                 break;
             case "Trap":
-                agent.SetActive(false);
-                agents.activeAgentCount -= 1;
-                if (agents.activeAgentCount < targetCount && state.objectiveState == ObjectiveState.INPROGRESS)
+                agents.Remove(agent);
+                if (agents.activeAgentCount < targetCount)
                     state.FailObjective();
                 break;
             default:
@@ -82,8 +80,7 @@ public class Level : MonoBehaviour
 
     public void SetEventRules()
     {
-        foreach (var mouse in agents.agents)
-            mouse.OnHit += OnAgentHit;
+        Subscribe(Events.AGENT_HIT, data => OnAgentHit(data.Item1, data.Item2));
 
         Subscribe(Events.TIME_OVER, _ =>
         {
@@ -94,15 +91,14 @@ public class Level : MonoBehaviour
 
         Subscribe(Events.OBJECTIVE_FAILED, _ =>
         {
-            SetAgentsStopped(true);
             Log("Objective failed");
             float percentage = completeTargetCount / GetLevelTargetCount(0);
             int stars = 0;
-            UIManager.Instance.UpdateCanvas(
+            ui.UpdateCanvas(
                 "Oh no! You need to save more mice!",
                 $"You saved {completeTargetCount} / {GetLevelTargetCount(0)} mice",
                 stars);
-            UIManager.Instance.ToggleCanvas(true);
+            ui.ToggleCanvas(true);
         });
 
         Subscribe(Events.OBJECTIVE_COMPLETED, _ =>
@@ -113,47 +109,27 @@ public class Level : MonoBehaviour
             if (percentage <= 0.3f) stars = 1;
             else if (percentage <= 0.8f) stars = 2;
             else stars = 3;
-            UIManager.Instance.UpdateCanvas(
+            ui.UpdateCanvas(
                 "Level completed!",
                 $"You saved {completeTargetCount} / {GetLevelTargetCount(0)} mice",
                 stars);
-            UIManager.Instance.ToggleCanvas(true);
+            ui.ToggleCanvas(true);
         });
-
-        Subscribe(Events.PAUSED, _ =>
-        {
-            Log("Paused");
-        });
-
-        Subscribe(Events.UNPAUSED, _ =>
-        {
-            Log("Unpaused");
-        });
-    }
-
-    // TODO refactor state to be local to agent
-    public void SetAgentsStopped(bool stopped)
-    {
-        foreach (var mouse in GameObject.FindObjectsOfType<Mouse>())
-        {
-            if(mouse.state != Mouse.State.REMOVED)
-            {
-                mouse.SetState(stopped ? Mouse.State.STOPPED : Mouse.State.MOVING);
-                mouse.UpdateState();
-            }
-        }
     }
 
     private IEnumerator Counter()
     {
-        while (state.timeState != TimeState.OVER && state.objectiveState != ObjectiveState.FAILED)
+        while (true)
         {
             if (state.timeState == TimeState.RUNNING)
             {
                 time -= Time.deltaTime;
                 yield return new WaitForEndOfFrame();
                 if (time <= 0)
+                {
                     state.Stop();
+                    break;
+                }
             }
             else
             {

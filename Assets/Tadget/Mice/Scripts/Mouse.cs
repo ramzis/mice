@@ -8,15 +8,6 @@ using Random = UnityEngine.Random;
 [DisallowMultipleComponent]
 public class Mouse : Agent
 {
-    public enum State
-    {
-        MOVING,
-        ROTATING,
-        STOPPED,
-        REMOVED
-    }
-
-    public State state;
     public float rayCircleRadius;
     public Vector2[] sensors;
     public Vector2 sensorOffset;
@@ -34,11 +25,6 @@ public class Mouse : Agent
         directionChosen = false;
         validHits = new bool[3];
         //SetState(State.STOPPED);
-    }
-
-    public void SetState(State newState)
-    {
-        state = newState;
     }
 
     private void OnDrawGizmos()

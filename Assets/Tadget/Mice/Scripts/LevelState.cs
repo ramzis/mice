@@ -74,6 +74,7 @@ public class LevelState
 
     private void SetTimeState(TimeState next)
     {
+        if (next == timeState) return;
         var prev = timeState;
         timeState = next;
         switch (timeState)
@@ -96,6 +97,7 @@ public class LevelState
 
     private void SetObjectiveState(ObjectiveState next)
     {
+        if (next == objectiveState) return;
         objectiveState = next;
         switch (objectiveState)
         {

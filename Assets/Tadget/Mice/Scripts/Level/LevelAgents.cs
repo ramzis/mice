@@ -37,7 +37,6 @@ public class LevelAgents<T> where T : Agent
         {
             if(agent == target.gameObject)
             {
-                target.gameObject.SetActive(false);
                 activeAgentCount -= 1;
             }
         }

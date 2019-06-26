@@ -24,13 +24,21 @@ public class Mouse : Agent
         circleResults = new Collider2D[2];
         directionChosen = false;
         validHits = new bool[3];
-        //SetState(State.STOPPED);
     }
 
     private void OnDrawGizmos()
     {
         foreach (var s in sensors)
             Gizmos.DrawWireSphere(transform.position + transform.TransformDirection(sensorOffset + s), rayCircleRadius);
+    }
+
+    private void FixedUpdate()
+    {
+        if (state == State.REMOVED || state == State.STOPPED)
+            return;
+
+        UpdateState();
+        Act();
     }
 
     private Collider2D[] circleResults;
@@ -65,12 +73,14 @@ public class Mouse : Agent
                         SetState(State.REMOVED);
                         validHit = true;
                         OnHit?.Invoke(gameObject, "Target");
+                        gameObject.SetActive(false);
                     }
                     else if (i == 1 && circleResults[j].CompareTag("Trap"))
                     {
                         SetState(State.REMOVED);
                         validHit = true;
                         OnHit?.Invoke(gameObject, "Trap");
+                        gameObject.SetActive(false);
                     }
                     if (validHit) break;
                 }

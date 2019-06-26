@@ -1,30 +1,32 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static LevelState;
 
 public class InputManager : MonoBehaviour
 {
-    private LevelState state;
+    private TimeState time;
+    private ObjectiveState objective;
 
-    public void Init(LevelState state)
+    public InputManager Init(TimeState time, ObjectiveState objective)
     {
-        this.state = state;
+        this.time = time;
+        this.objective = objective;
+        return this;
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape) && state.objectiveState == ObjectiveState.INPROGRESS)
+        if (Input.GetKeyDown(KeyCode.Escape) && objective.state == ObjectiveState.State.INPROGRESS)
         {
-            switch (state.timeState)
+            switch (time.state)
             {
-                case TimeState.PAUSED:
-                    state.Resume();
+                case TimeState.State.PAUSED:
+                    time.Resume();
                     break;
-                case TimeState.RUNNING:
-                    state.Pause();
+                case TimeState.State.RUNNING:
+                    time.Pause();
                     break;
-                case TimeState.OVER:
+                case TimeState.State.OVER:
                     break;
                 default:
                     break;

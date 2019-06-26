@@ -32,6 +32,14 @@ public class EventManager
         }
     }
 
+    public static void Unsubscribe(string eventName, Action<dynamic> action)
+    {
+        if (dc.TryGetValue(eventName, out List<Action<dynamic>> fs))
+        {
+            fs.RemoveAll(a => a == action);
+        }
+    }
+
     public static void Emit(string eventName, dynamic payload = null)
     {
         if (dc.TryGetValue(eventName, out List<Action<dynamic>> fs))

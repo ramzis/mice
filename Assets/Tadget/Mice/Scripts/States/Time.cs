@@ -1,9 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using static EventManager;
+﻿using static EventManager;
 
-public class TimeState
+public class Time
 {
     public enum State
     {
@@ -14,12 +11,12 @@ public class TimeState
 
     public State state { get; private set; } = State.PAUSED;
 
-    public TimeState()
+    public Time()
     {
 
     }
 
-    public TimeState(State state)
+    public Time(State state)
     {
         this.state = state;
     }

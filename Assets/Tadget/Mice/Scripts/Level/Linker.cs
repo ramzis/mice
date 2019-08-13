@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static EventManager;
 using static UnityEngine.Random;
 
 public class Linker : MonoBehaviour
@@ -9,14 +10,14 @@ public class Linker : MonoBehaviour
     private Level level;
     private GameObject level_go;
 
-    private InputManager inputManager;
+    private Input input;
     private GameObject inputManager_go;
 
-    private UIManager uiManager;
+    private Canvas levelCanvas;
     public GameObject uiManager_prefab;
 
-    private TimeState time;
-    private ObjectiveState objective;
+    private Time time;
+    private Objective objective;
 
     private CoroutineLauncher coroutineLauncher;
 
@@ -25,23 +26,25 @@ public class Linker : MonoBehaviour
         InitState(DateTime.Now.Millisecond);
         coroutineLauncher = new GameObject("Coroutines").AddComponent<CoroutineLauncher>();
 
-        uiManager = Instantiate(uiManager_prefab).GetComponent<UIManager>();
-        uiManager.ToggleCanvas(false);
-        time = new TimeState();
-        objective = new ObjectiveState();
+        levelCanvas = Instantiate(uiManager_prefab).GetComponent<Canvas>();
+        Emit(Events.TOGGLE_CANVAS, false);
+        time = new Time();
+        objective = new Objective();
 
         level_go = new GameObject("Level");
         level = level_go.AddComponent<Level>();
-        level.objective = objective;
-
-        level.agents = new LevelAgents<Mouse>();
-        level.ui = uiManager;
 
         inputManager_go = new GameObject("Input");
-        inputManager = inputManager_go.AddComponent<InputManager>().Init(time, objective);
+        input = inputManager_go.AddComponent<Input>().Init(time, objective);
 
-        var timer = new Timer().Init(/*TODO GET REAL TIME OF LEVEL*/10f, time, coroutineLauncher);
-        level.StartLevel(10, timer);
+        var timer = new Timer().Init(LevelTools.GetLevelTime(0), time, coroutineLauncher);
+
+        var targets = new Targets(
+            LevelTools.GetLevelTargetCount(0),
+            UnityEngine.GameObject.FindObjectsOfType<Agent>().Length,
+            0);
+
+        level.Init(timer, targets, objective);
     }
 }
 

@@ -1,16 +1,22 @@
 using System;
 using System.Collections;
 using UnityEngine;
-using static TimeState;
+using static Time;
 
-public class Timer : Level.ITimer
+public interface ITimer
+{
+    float GetTime();
+    void StartTimer();
+}
+
+public class Timer : ITimer
 {
     private float s;
-    private TimeState time;
+    private Time time;
     private Coroutine counter;
     private MonoBehaviour mono;
 
-    public Timer Init(float s, TimeState state, MonoBehaviour mono)
+    public Timer Init(float s, Time state, MonoBehaviour mono)
     {
         this.s = s;
         this.time = state;
@@ -35,7 +41,7 @@ public class Timer : Level.ITimer
         {
             if (time.state == State.RUNNING)
             {
-                s -= Time.deltaTime;
+                s -= UnityEngine.Time.deltaTime;
                 yield return new WaitForEndOfFrame();
                 if (s <= 0)
                 {

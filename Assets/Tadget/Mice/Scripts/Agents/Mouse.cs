@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using static UnityEngine.Debug;
+using static EventManager;
 using Random = UnityEngine.Random;
 
 [DisallowMultipleComponent]
@@ -24,6 +25,7 @@ public class Mouse : Agent
         circleResults = new Collider2D[2];
         directionChosen = false;
         validHits = new bool[3];
+        OnHit += (a, h) => Emit(Events.AGENT_HIT, (a, h));
     }
 
     private void OnDrawGizmos()
@@ -47,9 +49,6 @@ public class Mouse : Agent
     bool validHit;
     public override void UpdateState()   
     {
-        if (state == State.STOPPED || state == State.REMOVED)
-            return;
-
         for(int i = 0; i < sensors.Length; i++)
         {
             circleHits = Physics2D.OverlapCircleNonAlloc(
@@ -134,12 +133,12 @@ public class Mouse : Agent
 
         void Move()
         {
-            transform.Translate(Vector3.up * forwardVelocity * Time.deltaTime, Space.Self);
+            transform.Translate(Vector3.up * forwardVelocity * UnityEngine.Time.deltaTime, Space.Self);
         }
 
         void Rotate()
         {
-            transform.Rotate(Vector3.forward, (0.95f + (Random.value * 0.1f)) * rotationAngle * rotationDir * Time.deltaTime, Space.Self);   
+            transform.Rotate(Vector3.forward, (0.95f + (Random.value * 0.1f)) * rotationAngle * rotationDir * UnityEngine.Time.deltaTime, Space.Self);   
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using static EventManager;
 
-public class ObjectiveState
+public class Objective
 {
     public enum State
     {
@@ -12,12 +12,11 @@ public class ObjectiveState
 
     public State state { get; private set; } = State.NULL;
 
-    public ObjectiveState()
+    public Objective()
     {
-
     }
 
-    public ObjectiveState(State state)
+    public Objective(State state)
     {
         this.state = state;
     }

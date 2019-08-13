@@ -1,32 +1,23 @@
 ﻿using System;
-using System.Collections;
 using UnityEngine;
 using static UnityEngine.Debug;
 using static EventManager;
-using static ObjectiveState;
 
 public class Level : MonoBehaviour
 {
-    public interface ITimer
-    {
-        float GetTime();
-        void StartTimer();
-    }
-
-    public ObjectiveState objective;
-    public LevelAgents<Mouse> agents; //Todo: look into removing this
-    public UIManager ui;
-
+    private Objective objective;
     private ITimer timer;
-    private int targetCount;
-    private int completeTargetCount;
+    private Targets targets;
 
-    public void StartLevel(int targetCount, ITimer timer)
+    public void Init(ITimer timer, Targets targets, Objective objective)
     {
         this.timer = timer;
-        this.targetCount = targetCount;
-        completeTargetCount = 0;
+        this.targets = targets;
+        this.objective = objective;
+    }
 
+    public void Begin(dynamic t)
+    {
         objective.Begin();
         timer.StartTimer();
         Log("Starting level");
@@ -40,6 +31,7 @@ public class Level : MonoBehaviour
         Subscribe(Events.TIME_OVER, OnTimeOver);
         Subscribe(Events.OBJECTIVE_FAILED, OnObjectiveFailed);
         Subscribe(Events.OBJECTIVE_COMPLETED, OnObjectiveCompleted);
+        Subscribe(Events.LEVEL_BEGIN, Begin);
     }
 
     private void OnDisable()
@@ -48,6 +40,7 @@ public class Level : MonoBehaviour
         Unsubscribe(Events.TIME_OVER, OnTimeOver);
         Unsubscribe(Events.OBJECTIVE_FAILED, OnObjectiveFailed);
         Unsubscribe(Events.OBJECTIVE_COMPLETED, OnObjectiveCompleted);
+        Unsubscribe(Events.LEVEL_BEGIN, Begin);
     }
 
     private void OnAgentHit(dynamic t)
@@ -56,14 +49,15 @@ public class Level : MonoBehaviour
             switch (t.Item1)
             {
                 case "Target":
-                    targetCount -= 1;
-                    completeTargetCount += 1;
-                    if (targetCount == 0)
+                    targets.complete += 1;
+                    targets.available -= 1;
+                    targets.remaining -= 1;
+                    if (targets.remaining == 0)
                         objective.Complete();
                     break;
                 case "Trap":
-                    agents.Remove(t.Item2);
-                    if (agents.activeAgentCount < targetCount)
+                    targets.available -= 1;
+                    if (targets.available < targets.remaining)
                         objective.Fail();
                     break;
                 default:
@@ -74,35 +68,32 @@ public class Level : MonoBehaviour
     private void OnTimeOver(dynamic t)
     {
         Log("Time over");
-        if (objective.state == State.INPROGRESS)
+        if (objective.state == Objective.State.INPROGRESS)
             objective.Fail();
     }
 
     private void OnObjectiveFailed(dynamic t)
     {
         Log("Objective failed");
-        float percentage = completeTargetCount / targetCount;
         int stars = 0;
-        ui.UpdateCanvas(
-            "Oh no! You need to save more mice!",
-            $"You saved {completeTargetCount} / {targetCount} mice",
-            stars);
-        ui.ToggleCanvas(true);
+        Emit(Events.UPDATE_CANVAS, ("Oh no! You need to save more mice!",
+            $"You saved {targets.complete} / {targets.complete + targets.available} mice",
+            stars));
+        Emit(Events.TOGGLE_CANVAS, true);
     }
 
     private void OnObjectiveCompleted(dynamic t)
     {
         Log("Objective completed");
-        float percentage = completeTargetCount / targetCount;
+        float percentage = targets.complete / (targets.complete + targets.available);
         int stars;
         if (percentage <= 0.3f) stars = 1;
         else if (percentage <= 0.8f) stars = 2;
         else stars = 3;
-        ui.UpdateCanvas(
-            "Level completed!",
-            $"You saved {completeTargetCount} / {targetCount} mice",
-            stars);
-        ui.ToggleCanvas(true);
+        Emit(Events.UPDATE_CANVAS, ("Level completed!",
+            $"You saved {targets.complete} / {targets.complete + targets.available} mice",
+            stars));
+        Emit(Events.TOGGLE_CANVAS, true);
     }
 
     #endregion

@@ -12,4 +12,7 @@ public sealed class Events
     public static readonly string PAUSED = "PAUSED";
     public static readonly string UNPAUSED = "UNPAUSED";
     public static readonly string AGENT_HIT = "AGENT_HIT";
+    public static readonly string UPDATE_CANVAS = "UPDATE_CANVAS";
+    public static readonly string TOGGLE_CANVAS = "TOGGLE_CANVAS";
+    public static readonly string LEVEL_BEGIN = "LEVEL_BEGIN";
 }

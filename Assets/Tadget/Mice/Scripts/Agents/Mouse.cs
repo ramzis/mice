@@ -25,7 +25,17 @@ public class Mouse : Agent
         circleResults = new Collider2D[2];
         directionChosen = false;
         validHits = new bool[3];
+
+    }
+
+    private void OnEnable()
+    {
         OnHit += (a, h) => Emit(Events.AGENT_HIT, (a, h));
+    }
+
+    private void OnDisable()
+    {
+        OnHit -= (a, h) => Emit(Events.AGENT_HIT, (a, h));
     }
 
     private void OnDrawGizmos()
@@ -47,9 +57,9 @@ public class Mouse : Agent
     bool[] validHits;
     int circleHits;
     bool validHit;
-    public override void UpdateState()   
+    public override void UpdateState()
     {
-        for(int i = 0; i < sensors.Length; i++)
+        for (int i = 0; i < sensors.Length; i++)
         {
             circleHits = Physics2D.OverlapCircleNonAlloc(
                 transform.position + transform.TransformDirection(sensors[i] + sensorOffset),
@@ -62,7 +72,7 @@ public class Mouse : Agent
             {
                 if (circleResults[j].gameObject != gameObject)
                 {
-                    if(circleResults[j].CompareTag("Mouse") || circleResults[j].CompareTag("Wall"))
+                    if (circleResults[j].CompareTag("Mouse") || circleResults[j].CompareTag("Wall"))
                     {
                         SetState(State.ROTATING);
                         validHit = true;
@@ -87,11 +97,11 @@ public class Mouse : Agent
             validHits[i] = validHit;
         }
 
-        if((validHits[1] && (validHits[0] || validHits[2])) && directionChosen)
+        if ((validHits[1] && (validHits[0] || validHits[2])) && directionChosen)
         {
 
         }
-        else if(((validHits[0] && validHits[2]) || validHits[1]) && !directionChosen)
+        else if (((validHits[0] && validHits[2]) || validHits[1]) && !directionChosen)
         {
             directionChosen = true;
             rotationDir = Random.value > 0.5f ? 1 : -1;
@@ -101,7 +111,7 @@ public class Mouse : Agent
             directionChosen = false;
             rotationDir = -1f;
         }
-        else if(validHits[2])
+        else if (validHits[2])
         {
             directionChosen = false;
             rotationDir = 1f;
@@ -138,7 +148,7 @@ public class Mouse : Agent
 
         void Rotate()
         {
-            transform.Rotate(Vector3.forward, (0.95f + (Random.value * 0.1f)) * rotationAngle * rotationDir * UnityEngine.Time.deltaTime, Space.Self);   
+            transform.Rotate(Vector3.forward, (0.95f + (Random.value * 0.1f)) * rotationAngle * rotationDir * UnityEngine.Time.deltaTime, Space.Self);
         }
     }
 }

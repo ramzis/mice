@@ -17,7 +17,7 @@ public class EventManager
         }
     }
 
-    private static Dictionary<string, List<Action<dynamic>>> dc = 
+    private static Dictionary<string, List<Action<dynamic>>> dc =
         new Dictionary<string, List<Action<dynamic>>>();
 
     public static void Subscribe(string eventName, Action<dynamic> action)
@@ -42,6 +42,7 @@ public class EventManager
 
     public static void Emit(string eventName, dynamic payload = null)
     {
+        UnityEngine.Debug.Log($"Event {eventName} {payload}");
         if (dc.TryGetValue(eventName, out List<Action<dynamic>> fs))
         {
             foreach (var f in fs)

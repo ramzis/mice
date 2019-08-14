@@ -3,24 +3,29 @@ using UnityEngine;
 using static UnityEngine.Debug;
 using static EventManager;
 
-public class Level : MonoBehaviour
+public class Level
 {
     private Objective objective;
     private ITimer timer;
     private Targets targets;
 
-    public void Init(ITimer timer, Targets targets, Objective objective)
+    public Level(ITimer timer, Targets targets, Objective objective)
     {
         this.timer = timer;
         this.targets = targets;
         this.objective = objective;
+        OnEnable();
     }
 
-    public void Begin(dynamic t)
+    ~Level()
+    {
+        OnDisable();
+    }
+
+    public void Begin()
     {
         objective.Begin();
         timer.StartTimer();
-        Log("Starting level");
     }
 
     #region EVENTS
@@ -31,7 +36,7 @@ public class Level : MonoBehaviour
         Subscribe(Events.TIME_OVER, OnTimeOver);
         Subscribe(Events.OBJECTIVE_FAILED, OnObjectiveFailed);
         Subscribe(Events.OBJECTIVE_COMPLETED, OnObjectiveCompleted);
-        Subscribe(Events.LEVEL_BEGIN, Begin);
+        Subscribe(Events.LEVEL_BEGIN, OnLevelBegin);
     }
 
     private void OnDisable()
@@ -40,12 +45,12 @@ public class Level : MonoBehaviour
         Unsubscribe(Events.TIME_OVER, OnTimeOver);
         Unsubscribe(Events.OBJECTIVE_FAILED, OnObjectiveFailed);
         Unsubscribe(Events.OBJECTIVE_COMPLETED, OnObjectiveCompleted);
-        Unsubscribe(Events.LEVEL_BEGIN, Begin);
+        Unsubscribe(Events.LEVEL_BEGIN, OnLevelBegin);
     }
 
     private void OnAgentHit(dynamic t)
     {
-        if(t.Item1 is string && t.Item2 is GameObject)
+        if (t.Item1 is string && t.Item2 is GameObject)
             switch (t.Item1)
             {
                 case "Target":
@@ -67,14 +72,12 @@ public class Level : MonoBehaviour
 
     private void OnTimeOver(dynamic t)
     {
-        Log("Time over");
         if (objective.state == Objective.State.INPROGRESS)
             objective.Fail();
     }
 
     private void OnObjectiveFailed(dynamic t)
     {
-        Log("Objective failed");
         int stars = 0;
         Emit(Events.UPDATE_CANVAS, ("Oh no! You need to save more mice!",
             $"You saved {targets.complete} / {targets.complete + targets.available} mice",
@@ -94,6 +97,11 @@ public class Level : MonoBehaviour
             $"You saved {targets.complete} / {targets.complete + targets.available} mice",
             stars));
         Emit(Events.TOGGLE_CANVAS, true);
+    }
+
+    private void OnLevelBegin(dynamic t)
+    {
+        Begin();
     }
 
     #endregion

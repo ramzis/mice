@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 using static Time;
+using static EventManager;
 
 public interface ITimer
 {
@@ -31,7 +32,14 @@ public class Timer : ITimer
 
     public void StartTimer()
     {
-        counter = mono.StartCoroutine(Counter());
+        if (counter != null)
+        {
+            throw new Exception("Attempting to start a counter while another one exists.");
+        }
+        else
+        {
+            counter = mono.StartCoroutine(Counter());
+        }
     }
 
     private IEnumerator Counter()
@@ -41,10 +49,11 @@ public class Timer : ITimer
         {
             if (time.state == State.RUNNING)
             {
-                s -= UnityEngine.Time.deltaTime;
                 yield return new WaitForEndOfFrame();
+                s -= UnityEngine.Time.deltaTime;
                 if (s <= 0)
                 {
+                    s = 0;
                     time.Stop();
                     break;
                 }
@@ -54,5 +63,6 @@ public class Timer : ITimer
                 yield return null;
             }
         }
+        counter = null;
     }
 }

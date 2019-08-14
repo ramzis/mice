@@ -19,6 +19,7 @@ public class Level
 
     ~Level()
     {
+        Debug.Log("Level deconstructed");
         OnDisable();
     }
 

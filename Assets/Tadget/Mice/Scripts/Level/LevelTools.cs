@@ -6,7 +6,7 @@ public class LevelTools
 {
     public static float GetLevelTime(int level)
     {
-        return 30f;
+        return 3f;
     }
 
     public static int GetLevelTargetCount(int level)

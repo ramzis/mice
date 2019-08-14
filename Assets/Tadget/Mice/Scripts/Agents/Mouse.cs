@@ -1,10 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System;
 using UnityEngine;
-using System;
-using static UnityEngine.Debug;
-using static EventManager;
 using Random = UnityEngine.Random;
+using static EventManager;
 
 [DisallowMultipleComponent]
 public class Mouse : Agent
@@ -25,32 +22,45 @@ public class Mouse : Agent
         circleResults = new Collider2D[2];
         directionChosen = false;
         validHits = new bool[3];
-
+        SetState(State.STOPPED);
     }
 
     private void OnEnable()
     {
-        OnHit += (a, h) => Emit(Events.AGENT_HIT, (a, h));
+        Subscribe(Events.PAUSED, TimeStatePausedEvent);
+        Subscribe(Events.UNPAUSED, TimeStateUnpausedEvent);
+        Subscribe(Events.TIME_OVER, TimeStateOverEvent);
     }
 
     private void OnDisable()
     {
-        OnHit -= (a, h) => Emit(Events.AGENT_HIT, (a, h));
+        Unsubscribe(Events.PAUSED, TimeStatePausedEvent);
+        Unsubscribe(Events.UNPAUSED, TimeStateUnpausedEvent);
+        Unsubscribe(Events.TIME_OVER, TimeStateOverEvent);
+    }
+
+    private void TimeStatePausedEvent(dynamic t)
+    {
+        if (state != State.REMOVED)
+            SetState(State.STOPPED);
+    }
+
+    private void TimeStateUnpausedEvent(dynamic t)
+    {
+        if (state != State.REMOVED)
+            SetState(State.MOVING);
+    }
+
+    private void TimeStateOverEvent(dynamic t)
+    {
+        if (state != State.REMOVED)
+            SetState(State.STOPPED);
     }
 
     private void OnDrawGizmos()
     {
         foreach (var s in sensors)
             Gizmos.DrawWireSphere(transform.position + transform.TransformDirection(sensorOffset + s), rayCircleRadius);
-    }
-
-    private void FixedUpdate()
-    {
-        if (state == State.REMOVED || state == State.STOPPED)
-            return;
-
-        UpdateState();
-        Act();
     }
 
     private Collider2D[] circleResults;
@@ -81,14 +91,14 @@ public class Mouse : Agent
                     {
                         SetState(State.REMOVED);
                         validHit = true;
-                        OnHit?.Invoke(gameObject, "Target");
+                        Emit(Events.AGENT_HIT, (gameObject, "Target"));
                         gameObject.SetActive(false);
                     }
                     else if (i == 1 && circleResults[j].CompareTag("Trap"))
                     {
                         SetState(State.REMOVED);
                         validHit = true;
-                        OnHit?.Invoke(gameObject, "Trap");
+                        Emit(Events.AGENT_HIT, (gameObject, "Trap"));
                         gameObject.SetActive(false);
                     }
                     if (validHit) break;

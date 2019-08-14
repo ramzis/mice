@@ -12,7 +12,6 @@ public abstract class Agent : MonoBehaviour
     }
 
     public State state { get; private set; }
-    public Action<GameObject, string> OnHit;
     public abstract void UpdateState();
     public abstract void Act();
 
@@ -20,5 +19,14 @@ public abstract class Agent : MonoBehaviour
     {
         if (state == next) return;
         state = next;
+    }
+
+    private void FixedUpdate()
+    {
+        if (state == State.REMOVED || state == State.STOPPED)
+            return;
+
+        UpdateState();
+        Act();
     }
 }

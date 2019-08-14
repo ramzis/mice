@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using static EventManager;
 
-public class Canvas : MonoBehaviour
+public class UICanvas : MonoBehaviour
 {
     public GameObject canvas;
     public TextMeshProUGUI header;
@@ -16,12 +13,19 @@ public class Canvas : MonoBehaviour
     public Button buttonMenu;
     public Button buttonRestart;
     public Button buttonNext;
+    public TextMeshProUGUI time;
+    public Timer timer;
 
     public enum StarSprite
     {
         EMPTY,
         HALF,
         FULL
+    }
+
+    private void Update()
+    {
+        UpdateTime();
     }
 
     private void ToggleCanvas(bool active)
@@ -34,7 +38,13 @@ public class Canvas : MonoBehaviour
         header.text = headerText;
         para.text = paraText;
         for (int i = 0; i < stars.Length; i++)
-            stars[i].sprite = starSprites[(int)(i < starCount ? StarSprite.FULL : StarSprite.EMPTY)] ;
+            stars[i].sprite = starSprites[(int)(i < starCount ? StarSprite.FULL : StarSprite.EMPTY)];
+    }
+
+    private void UpdateTime()
+    {
+        if (timer != null)
+            this.time.text = timer.GetTime().ToString();
     }
 
     private void OnEnable()

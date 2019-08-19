@@ -2,6 +2,7 @@
 using UnityEngine;
 using static UnityEngine.Debug;
 using static EventManager;
+using static EventReceiver;
 
 public class Level
 {
@@ -9,18 +10,15 @@ public class Level
     private ITimer timer;
     private Targets targets;
 
-    public Level(ITimer timer, Targets targets, Objective objective)
+    public Level(ITimer timer, Objective objective)
     {
         this.timer = timer;
-        this.targets = targets;
+        this.targets = new Targets(
+            LevelTools.GetLevelTargetCount(0),
+            UnityEngine.GameObject.FindObjectsOfType<Agent>().Length,
+            0);
         this.objective = objective;
-        OnEnable();
-    }
-
-    ~Level()
-    {
-        Debug.Log("Level deconstructed");
-        OnDisable();
+        SubscribeEvents();
     }
 
     public void Begin()
@@ -31,53 +29,43 @@ public class Level
 
     #region EVENTS
 
-    private void OnEnable()
+    private void SubscribeEvents()
     {
-        Subscribe(Events.AGENT_HIT, OnAgentHit);
+        Subscribe<(string tag, GameObject go)>(Events.AGENT_HIT, OnAgentHit);
         Subscribe(Events.TIME_OVER, OnTimeOver);
         Subscribe(Events.OBJECTIVE_FAILED, OnObjectiveFailed);
         Subscribe(Events.OBJECTIVE_COMPLETED, OnObjectiveCompleted);
         Subscribe(Events.LEVEL_BEGIN, OnLevelBegin);
     }
 
-    private void OnDisable()
+    private void OnAgentHit((string tag, GameObject go) hit)
     {
-        Unsubscribe(Events.AGENT_HIT, OnAgentHit);
-        Unsubscribe(Events.TIME_OVER, OnTimeOver);
-        Unsubscribe(Events.OBJECTIVE_FAILED, OnObjectiveFailed);
-        Unsubscribe(Events.OBJECTIVE_COMPLETED, OnObjectiveCompleted);
-        Unsubscribe(Events.LEVEL_BEGIN, OnLevelBegin);
+        switch (hit.tag)
+        {
+            case "Target":
+                targets.complete += 1;
+                targets.available -= 1;
+                targets.remaining -= 1;
+                if (targets.remaining == 0)
+                    objective.Complete();
+                break;
+            case "Trap":
+                targets.available -= 1;
+                if (targets.available < targets.remaining)
+                    objective.Fail();
+                break;
+            default:
+                break;
+        }
     }
 
-    private void OnAgentHit(dynamic t)
-    {
-        if (t.Item1 is string && t.Item2 is GameObject)
-            switch (t.Item1)
-            {
-                case "Target":
-                    targets.complete += 1;
-                    targets.available -= 1;
-                    targets.remaining -= 1;
-                    if (targets.remaining == 0)
-                        objective.Complete();
-                    break;
-                case "Trap":
-                    targets.available -= 1;
-                    if (targets.available < targets.remaining)
-                        objective.Fail();
-                    break;
-                default:
-                    break;
-            }
-    }
-
-    private void OnTimeOver(dynamic t)
+    private void OnTimeOver()
     {
         if (objective.state == Objective.State.INPROGRESS)
             objective.Fail();
     }
 
-    private void OnObjectiveFailed(dynamic t)
+    private void OnObjectiveFailed()
     {
         int stars = 0;
         Emit(Events.UPDATE_CANVAS, ("Oh no! You need to save more mice!",
@@ -86,7 +74,7 @@ public class Level
         Emit(Events.TOGGLE_CANVAS, true);
     }
 
-    private void OnObjectiveCompleted(dynamic t)
+    private void OnObjectiveCompleted()
     {
         Log("Objective completed");
         float percentage = targets.complete / (targets.complete + targets.available);
@@ -100,7 +88,7 @@ public class Level
         Emit(Events.TOGGLE_CANVAS, true);
     }
 
-    private void OnLevelBegin(dynamic t)
+    private void OnLevelBegin()
     {
         Begin();
     }

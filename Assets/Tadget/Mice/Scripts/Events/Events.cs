@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-public sealed class Events
+﻿public sealed class Events
 {
     public static readonly string OBJECTIVE_FAILED = "OBJECTIVE_FAILED";
     public static readonly string OBJECTIVE_COMPLETED = "OBJECTIVE_COMPLETED";

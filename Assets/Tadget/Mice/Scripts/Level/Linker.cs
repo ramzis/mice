@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using static EventManager;
+using static EventReceiver;
 using static UnityEngine.Random;
 
 public class Linker : MonoBehaviour
@@ -22,19 +23,14 @@ public class Linker : MonoBehaviour
 
     private void OnEnable()
     {
-        Subscribe(Events.LEVEL_SETUP, SetupLevelEvent);
-    }
-
-    private void OnDisable()
-    {
-        Unsubscribe(Events.LEVEL_SETUP, SetupLevelEvent);
+        Subscribe<int>(Events.LEVEL_SETUP, SetupLevel);
     }
 
     private void SetupLevel(int levelIdx)
     {
         Emit(Events.TOGGLE_CANVAS, false);
 
-        var time = new Time();
+        Time time = new Time();
         var objective = new Objective();
 
         input.Init(time, objective);
@@ -44,19 +40,6 @@ public class Linker : MonoBehaviour
 
         canvas.timer = timer;
 
-        var targets = new Targets(
-            LevelTools.GetLevelTargetCount(levelIdx),
-            UnityEngine.GameObject.FindObjectsOfType<Agent>().Length,
-            0);
-
-        var level = new Level(timer, targets, objective);
-    }
-
-    private void SetupLevelEvent(dynamic t)
-    {
-        if (t is int)
-        {
-            SetupLevel(t);
-        }
+        var level = new Level(timer, objective);
     }
 }

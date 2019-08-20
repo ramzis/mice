@@ -23,20 +23,19 @@ public class Linker : MonoBehaviour
 
     private void OnEnable()
     {
-        Subscribe<int>(Events.LEVEL_SETUP, SetupLevel);
+        Subscribe(Events.LEVEL_SETUP, SetupLevel);
+        Subscribe(Events.LEVEL_SETUP, () => Emit(Events.TOGGLE_CANVAS, false));
+        Subscribe(Events.LEVEL_RESET, () => Emit(Events.TOGGLE_CANVAS, false));
     }
 
-    private void SetupLevel(int levelIdx)
+    private void SetupLevel()
     {
-        Emit(Events.TOGGLE_CANVAS, false);
-
-        Time time = new Time();
+        var time = new Time();
         var objective = new Objective();
 
         input.Init(time, objective);
 
-        var timer = new Timer()
-            .Init(LevelTools.GetLevelTime(levelIdx), time, coroutineLauncher);
+        var timer = new Timer(time, coroutineLauncher);
 
         canvas.timer = timer;
 

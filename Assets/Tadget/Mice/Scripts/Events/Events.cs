@@ -12,4 +12,5 @@
     public static readonly string TOGGLE_CANVAS = "TOGGLE_CANVAS";
     public static readonly string LEVEL_SETUP = "LEVEL_SETUP";
     public static readonly string LEVEL_BEGIN = "LEVEL_BEGIN";
+    public static readonly string LEVEL_RESET = "LEVEL_RESET";
 }

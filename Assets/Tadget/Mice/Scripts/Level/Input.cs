@@ -17,13 +17,17 @@ public class Input : MonoBehaviour
 
     private void Update()
     {
+        if (UnityEngine.Input.GetKeyDown(KeyCode.Z))
+        {
+            Emit(Events.LEVEL_SETUP);
+        }
         if (UnityEngine.Input.GetKeyDown(KeyCode.X))
         {
             Emit(Events.LEVEL_BEGIN);
         }
-        if (UnityEngine.Input.GetKeyDown(KeyCode.Z))
+        if (UnityEngine.Input.GetKeyDown(KeyCode.C))
         {
-            Emit(Events.LEVEL_SETUP, 0);
+            Emit(Events.LEVEL_RESET);
         }
         if (!isInit) return;
         if (UnityEngine.Input.GetKeyDown(KeyCode.Escape) && objective.state == Objective.State.INPROGRESS)

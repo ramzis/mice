@@ -1,13 +1,12 @@
-using System;
 using System.Collections;
 using UnityEngine;
-using static Time;
-using static EventManager;
 
 public interface ITimer
 {
     float GetTime();
-    void StartTimer();
+    Timer StartTimer();
+    Timer PauseTimer();
+    Timer SetTimer(float time);
 }
 
 public class Timer : ITimer
@@ -17,12 +16,11 @@ public class Timer : ITimer
     private Coroutine counter;
     private MonoBehaviour mono;
 
-    public Timer Init(float s, Time state, MonoBehaviour mono)
+    public Timer(Time time, MonoBehaviour mono)
     {
-        this.s = s;
-        this.time = state;
+        this.time = time;
         this.mono = mono;
-        return this;
+        counter = mono.StartCoroutine(Counter());
     }
 
     public float GetTime()
@@ -30,24 +28,29 @@ public class Timer : ITimer
         return s;
     }
 
-    public void StartTimer()
+    public Timer SetTimer(float s)
     {
-        if (counter != null)
-        {
-            throw new Exception("Attempting to start a counter while another one exists.");
-        }
-        else
-        {
-            counter = mono.StartCoroutine(Counter());
-        }
+        this.s = s;
+        return this;
+    }
+
+    public Timer PauseTimer()
+    {
+        time.Pause();
+        return this;
+    }
+
+    public Timer StartTimer()
+    {
+        time.Play();
+        return this;
     }
 
     private IEnumerator Counter()
     {
-        time.Play();
         while (true)
         {
-            if (time.state == State.RUNNING)
+            if (time.state == Time.State.RUNNING)
             {
                 yield return new WaitForEndOfFrame();
                 s -= UnityEngine.Time.deltaTime;
@@ -55,7 +58,6 @@ public class Timer : ITimer
                 {
                     s = 0;
                     time.Stop();
-                    break;
                 }
             }
             else
@@ -63,6 +65,5 @@ public class Timer : ITimer
                 yield return null;
             }
         }
-        counter = null;
     }
 }

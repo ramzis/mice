@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using static UnityEngine.Debug;
 using static EventManager;
 using static EventReceiver;
@@ -9,22 +8,37 @@ public class Level
     private Objective objective;
     private ITimer timer;
     private Targets targets;
+    // TODO: get actual level index through Begin()
 
     public Level(ITimer timer, Objective objective)
     {
         this.timer = timer;
-        this.targets = new Targets(
-            LevelTools.GetLevelTargetCount(0),
-            UnityEngine.GameObject.FindObjectsOfType<Agent>().Length,
-            0);
         this.objective = objective;
         SubscribeEvents();
     }
 
     public void Begin()
     {
+        // TODO: spawn items
+        SetTargets();
         objective.Begin();
         timer.StartTimer();
+    }
+
+    public void Reset()
+    {
+        timer.PauseTimer();
+        objective.Nullify();
+        timer.SetTimer(LevelTools.GetLevelTime(0));
+        // TODO: despawn items if they exist
+    }
+
+    public void SetTargets()
+    {
+        this.targets = new Targets(
+            LevelTools.GetLevelTargetCount(0),
+            UnityEngine.GameObject.FindObjectsOfType<Agent>().Length,
+            0);
     }
 
     #region EVENTS
@@ -36,6 +50,7 @@ public class Level
         Subscribe(Events.OBJECTIVE_FAILED, OnObjectiveFailed);
         Subscribe(Events.OBJECTIVE_COMPLETED, OnObjectiveCompleted);
         Subscribe(Events.LEVEL_BEGIN, OnLevelBegin);
+        Subscribe(Events.LEVEL_RESET, OnLevelReset);
     }
 
     private void OnAgentHit((string tag, GameObject go) hit)
@@ -91,6 +106,11 @@ public class Level
     private void OnLevelBegin()
     {
         Begin();
+    }
+
+    private void OnLevelReset()
+    {
+        Reset();
     }
 
     #endregion

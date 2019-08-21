@@ -48,13 +48,16 @@ public class Objective
         switch (state)
         {
             case State.INPROGRESS:
-                Emit(Events.OBJECTIVE_INPROGRESS);
+                Emit(Events.ON_OBJECTIVE_INPROGRESS);
                 break;
             case State.COMPLETED:
-                Emit(Events.OBJECTIVE_COMPLETED);
+                Emit(Events.ON_OBJECTIVE_COMPLETED);
                 break;
             case State.FAILED:
-                Emit(Events.OBJECTIVE_FAILED);
+                Emit(Events.ON_OBJECTIVE_FAILED);
+                break;
+            case State.NULL:
+                Emit(Events.ON_OBJECTIVE_NULL);
                 break;
             default:
                 break;

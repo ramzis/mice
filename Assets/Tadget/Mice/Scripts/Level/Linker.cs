@@ -4,9 +4,10 @@ using static EventManager;
 using static EventReceiver;
 using static UnityEngine.Random;
 
+// The composition root
 public class Linker : MonoBehaviour
 {
-    public class CoroutineLauncher : MonoBehaviour { }
+    public sealed class CoroutineLauncher : MonoBehaviour { }
 
     public UICanvas canvas;
     private Input input;
@@ -23,9 +24,9 @@ public class Linker : MonoBehaviour
 
     private void OnEnable()
     {
-        Subscribe(Events.LEVEL_SETUP, SetupLevel);
-        Subscribe(Events.LEVEL_SETUP, () => Emit(Events.TOGGLE_CANVAS, false));
-        Subscribe(Events.LEVEL_RESET, () => Emit(Events.TOGGLE_CANVAS, false));
+        Subscribe(Events.DO_LEVEL_SETUP, SetupLevel);
+        Subscribe(Events.DO_LEVEL_SETUP, () => Emit(Events.DO_TOGGLE_CANVAS, false));
+        Subscribe(Events.DO_LEVEL_RESET, () => Emit(Events.DO_TOGGLE_CANVAS, false));
     }
 
     private void SetupLevel()

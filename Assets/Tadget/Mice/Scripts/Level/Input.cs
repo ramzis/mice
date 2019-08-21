@@ -19,15 +19,15 @@ public class Input : MonoBehaviour
     {
         if (UnityEngine.Input.GetKeyDown(KeyCode.Z))
         {
-            Emit(Events.LEVEL_SETUP);
+            Emit(Events.DO_LEVEL_SETUP);
         }
         if (UnityEngine.Input.GetKeyDown(KeyCode.X))
         {
-            Emit(Events.LEVEL_BEGIN);
+            Emit(Events.DO_LEVEL_BEGIN);
         }
         if (UnityEngine.Input.GetKeyDown(KeyCode.C))
         {
-            Emit(Events.LEVEL_RESET);
+            Emit(Events.DO_LEVEL_RESET);
         }
         if (!isInit) return;
         if (UnityEngine.Input.GetKeyDown(KeyCode.Escape) && objective.state == Objective.State.INPROGRESS)
@@ -35,12 +35,12 @@ public class Input : MonoBehaviour
             switch (time.state)
             {
                 case Time.State.PAUSED:
-                    time.Resume();
+                    time.Play();
                     break;
-                case Time.State.RUNNING:
+                case Time.State.PLAYING:
                     time.Pause();
                     break;
-                case Time.State.OVER:
+                case Time.State.STOPPED:
                     break;
                 default:
                     break;

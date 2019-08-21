@@ -50,7 +50,7 @@ public class Timer : ITimer
     {
         while (true)
         {
-            if (time.state == Time.State.RUNNING)
+            if (time.state == Time.State.PLAYING)
             {
                 yield return new WaitForEndOfFrame();
                 s -= UnityEngine.Time.deltaTime;

@@ -45,12 +45,12 @@ public class Level
 
     private void SubscribeEvents()
     {
-        Subscribe<(string tag, GameObject go)>(Events.AGENT_HIT, OnAgentHit);
-        Subscribe(Events.TIME_OVER, OnTimeOver);
-        Subscribe(Events.OBJECTIVE_FAILED, OnObjectiveFailed);
-        Subscribe(Events.OBJECTIVE_COMPLETED, OnObjectiveCompleted);
-        Subscribe(Events.LEVEL_BEGIN, OnLevelBegin);
-        Subscribe(Events.LEVEL_RESET, OnLevelReset);
+        Subscribe<(string tag, GameObject go)>(Events.ON_AGENT_HIT, OnAgentHit);
+        Subscribe(Events.ON_TIME_OVER, OnTimeOver);
+        Subscribe(Events.ON_OBJECTIVE_FAILED, OnObjectiveFailed);
+        Subscribe(Events.ON_OBJECTIVE_COMPLETED, OnObjectiveCompleted);
+        Subscribe(Events.DO_LEVEL_BEGIN, OnLevelBegin);
+        Subscribe(Events.DO_LEVEL_RESET, OnLevelReset);
     }
 
     private void OnAgentHit((string tag, GameObject go) hit)
@@ -83,10 +83,10 @@ public class Level
     private void OnObjectiveFailed()
     {
         int stars = 0;
-        Emit(Events.UPDATE_CANVAS, ("Oh no! You need to save more mice!",
+        Emit(Events.DO_UPDATE_CANVAS, ("Oh no! You need to save more mice!",
             $"You saved {targets.complete} / {targets.complete + targets.available} mice",
             stars));
-        Emit(Events.TOGGLE_CANVAS, true);
+        Emit(Events.DO_TOGGLE_CANVAS, true);
     }
 
     private void OnObjectiveCompleted()
@@ -97,10 +97,10 @@ public class Level
         if (percentage <= 0.3f) stars = 1;
         else if (percentage <= 0.8f) stars = 2;
         else stars = 3;
-        Emit(Events.UPDATE_CANVAS, ("Level completed!",
+        Emit(Events.DO_UPDATE_CANVAS, ("Level completed!",
             $"You saved {targets.complete} / {targets.complete + targets.available} mice",
             stars));
-        Emit(Events.TOGGLE_CANVAS, true);
+        Emit(Events.DO_TOGGLE_CANVAS, true);
     }
 
     private void OnLevelBegin()

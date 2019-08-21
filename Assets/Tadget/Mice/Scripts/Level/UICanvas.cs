@@ -49,7 +49,7 @@ public class UICanvas : MonoBehaviour
 
     private void OnEnable()
     {
-        Subscribe<bool>(Events.TOGGLE_CANVAS, ToggleCanvas);
-        Subscribe<(string headerText, string paraText, int starCount)>(Events.UPDATE_CANVAS, UpdateCanvas);
+        Subscribe<bool>(Events.DO_TOGGLE_CANVAS, ToggleCanvas);
+        Subscribe<(string headerText, string paraText, int starCount)>(Events.DO_UPDATE_CANVAS, UpdateCanvas);
     }
 }

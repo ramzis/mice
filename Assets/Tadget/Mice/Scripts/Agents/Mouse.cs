@@ -27,16 +27,16 @@ public class Mouse : Agent
 
     private void OnEnable()
     {
-        Subscribe(Events.PAUSED, TimeStatePausedEvent);
-        Subscribe(Events.UNPAUSED, TimeStateUnpausedEvent);
-        Subscribe(Events.TIME_OVER, TimeStateOverEvent);
+        Subscribe(Events.ON_PAUSED, TimeStatePausedEvent);
+        Subscribe(Events.ON_UNPAUSED, TimeStateUnpausedEvent);
+        Subscribe(Events.ON_TIME_OVER, TimeStateOverEvent);
     }
 
     private void OnDisable()
     {
-        Unsubscribe(Events.PAUSED, TimeStatePausedEvent);
-        Unsubscribe(Events.UNPAUSED, TimeStateUnpausedEvent);
-        Unsubscribe(Events.TIME_OVER, TimeStateOverEvent);
+        Unsubscribe(Events.ON_PAUSED, TimeStatePausedEvent);
+        Unsubscribe(Events.ON_UNPAUSED, TimeStateUnpausedEvent);
+        Unsubscribe(Events.ON_TIME_OVER, TimeStateOverEvent);
     }
 
     private void TimeStatePausedEvent(dynamic t)
@@ -91,14 +91,14 @@ public class Mouse : Agent
                     {
                         SetState(State.REMOVED);
                         validHit = true;
-                        Emit(Events.AGENT_HIT, (gameObject, "Target"));
+                        Emit(Events.ON_AGENT_HIT, (gameObject, "Target"));
                         gameObject.SetActive(false);
                     }
                     else if (i == 1 && circleResults[j].CompareTag("Trap"))
                     {
                         SetState(State.REMOVED);
                         validHit = true;
-                        Emit(Events.AGENT_HIT, (gameObject, "Trap"));
+                        Emit(Events.ON_AGENT_HIT, (gameObject, "Trap"));
                         gameObject.SetActive(false);
                     }
                     if (validHit) break;

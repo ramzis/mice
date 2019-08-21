@@ -5,8 +5,8 @@ public class Time
     public enum State
     {
         PAUSED,
-        RUNNING,
-        OVER
+        PLAYING,
+        STOPPED
     }
 
     public State state { get; private set; } = State.PAUSED;
@@ -23,7 +23,7 @@ public class Time
 
     public void Play()
     {
-        Set(State.RUNNING);
+        Set(State.PLAYING);
     }
 
     public void Pause()
@@ -31,14 +31,9 @@ public class Time
         Set(State.PAUSED);
     }
 
-    public void Resume()
-    {
-        Set(State.RUNNING);
-    }
-
     public void Stop()
     {
-        Set(State.OVER);
+        Set(State.STOPPED);
     }
 
     private void Set(State next)
@@ -49,15 +44,16 @@ public class Time
         switch (state)
         {
             case State.PAUSED:
-                Emit(Events.PAUSED);
+                Emit(Events.ON_PAUSED);
                 break;
-            case State.RUNNING:
+            case State.PLAYING:
                 if (prev == State.PAUSED)
-                    Emit(Events.UNPAUSED);
-                Emit(Events.RUNNING);
+                    Emit(Events.ON_UNPAUSED);
+                else
+                    Emit(Events.ON_RUNNING);
                 break;
-            case State.OVER:
-                Emit(Events.TIME_OVER);
+            case State.STOPPED:
+                Emit(Events.ON_TIME_OVER);
                 break;
             default:
                 break;

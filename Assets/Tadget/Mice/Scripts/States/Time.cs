@@ -53,7 +53,7 @@ public class Time
                     Emit(Events.ON_RUNNING);
                 break;
             case State.STOPPED:
-                Emit(Events.ON_TIME_OVER);
+                Emit(Events.ON_TIME_STOPPED);
                 break;
             default:
                 break;

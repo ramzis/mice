@@ -46,7 +46,7 @@ public class Level
     private void SubscribeEvents()
     {
         Subscribe<(string tag, GameObject go)>(Events.ON_AGENT_HIT, OnAgentHit);
-        Subscribe(Events.ON_TIME_OVER, OnTimeOver);
+        Subscribe(Events.ON_TIME_STOPPED, OnTimeOver);
         Subscribe(Events.ON_OBJECTIVE_FAILED, OnObjectiveFailed);
         Subscribe(Events.ON_OBJECTIVE_COMPLETED, OnObjectiveCompleted);
         Subscribe(Events.DO_LEVEL_BEGIN, OnLevelBegin);

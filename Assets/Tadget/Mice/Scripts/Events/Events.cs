@@ -5,7 +5,7 @@
     public static readonly string ON_OBJECTIVE_FAILED = "ON_OBJECTIVE_FAILED";
     public static readonly string ON_OBJECTIVE_COMPLETED = "ON_OBJECTIVE_COMPLETED";
     public static readonly string ON_OBJECTIVE_INPROGRESS = "ON_OBJECTIVE_INPROGRESS";
-    public static readonly string ON_TIME_OVER = "ON_TIME_OVER";
+    public static readonly string ON_TIME_STOPPED = "ON_TIME_STOPPED";
     public static readonly string ON_RUNNING = "ON_RUNNING";
     public static readonly string ON_PAUSED = "ON_PAUSED";
     public static readonly string ON_UNPAUSED = "ON_UNPAUSED";

@@ -6,9 +6,14 @@ public interface ITimer
     float GetTime();
     Timer StartTimer();
     Timer PauseTimer();
+    Timer StopTimer();
     Timer SetTimer(float time);
 }
 
+/// <summary>
+/// Controls Time with an ITimer implementation.
+/// Implements ITimer using a Coroutine as the timekeeping solution.
+/// </summary>
 public class Timer : ITimer
 {
     private float s;
@@ -46,6 +51,15 @@ public class Timer : ITimer
         return this;
     }
 
+    public Timer StopTimer()
+    {
+        time.Stop();
+        return this;
+    }
+
+    /// <summary>
+    /// Subtracts Time.deltaTime from s when the time state is PLAYING.
+    /// </summary>
     private IEnumerator Counter()
     {
         while (true)
@@ -62,7 +76,7 @@ public class Timer : ITimer
             }
             else
             {
-                yield return null;
+                yield return new WaitForEndOfFrame();
             }
         }
     }

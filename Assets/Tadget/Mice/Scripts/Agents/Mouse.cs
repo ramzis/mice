@@ -29,14 +29,14 @@ public class Mouse : Agent
     {
         Subscribe(Events.ON_PAUSED, TimeStatePausedEvent);
         Subscribe(Events.ON_UNPAUSED, TimeStateUnpausedEvent);
-        Subscribe(Events.ON_TIME_OVER, TimeStateOverEvent);
+        Subscribe(Events.ON_TIME_STOPPED, TimeStateStoppedEvent);
     }
 
     private void OnDisable()
     {
         Unsubscribe(Events.ON_PAUSED, TimeStatePausedEvent);
         Unsubscribe(Events.ON_UNPAUSED, TimeStateUnpausedEvent);
-        Unsubscribe(Events.ON_TIME_OVER, TimeStateOverEvent);
+        Unsubscribe(Events.ON_TIME_STOPPED, TimeStateStoppedEvent);
     }
 
     private void TimeStatePausedEvent(dynamic t)
@@ -51,7 +51,7 @@ public class Mouse : Agent
             SetState(State.MOVING);
     }
 
-    private void TimeStateOverEvent(dynamic t)
+    private void TimeStateStoppedEvent(dynamic t)
     {
         if (state != State.REMOVED)
             SetState(State.STOPPED);

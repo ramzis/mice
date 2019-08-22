@@ -25,38 +25,6 @@ public class Mouse : Agent
         SetState(State.STOPPED);
     }
 
-    private void OnEnable()
-    {
-        Subscribe(Events.ON_PAUSED, TimeStatePausedEvent);
-        Subscribe(Events.ON_UNPAUSED, TimeStateUnpausedEvent);
-        Subscribe(Events.ON_TIME_STOPPED, TimeStateStoppedEvent);
-    }
-
-    private void OnDisable()
-    {
-        Unsubscribe(Events.ON_PAUSED, TimeStatePausedEvent);
-        Unsubscribe(Events.ON_UNPAUSED, TimeStateUnpausedEvent);
-        Unsubscribe(Events.ON_TIME_STOPPED, TimeStateStoppedEvent);
-    }
-
-    private void TimeStatePausedEvent(dynamic t)
-    {
-        if (state != State.REMOVED)
-            SetState(State.STOPPED);
-    }
-
-    private void TimeStateUnpausedEvent(dynamic t)
-    {
-        if (state != State.REMOVED)
-            SetState(State.MOVING);
-    }
-
-    private void TimeStateStoppedEvent(dynamic t)
-    {
-        if (state != State.REMOVED)
-            SetState(State.STOPPED);
-    }
-
     private void OnDrawGizmos()
     {
         foreach (var s in sensors)

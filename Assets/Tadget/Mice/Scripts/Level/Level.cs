@@ -8,37 +8,34 @@ public class Level
     private Objective objective;
     private ITimer timer;
     private Targets targets;
-    // TODO: get actual level index through Begin()
+    private Parameters parameters;
 
     public Level(ITimer timer, Objective objective)
     {
         this.timer = timer;
         this.objective = objective;
+        this.parameters = new Parameters(0, new Targets(0, 0, 0));
         SubscribeEvents();
+    }
+
+    public void Setup(Parameters parameters)
+    {
+        this.parameters = parameters;
+        Reset();
     }
 
     public void Begin()
     {
-        // TODO: spawn items
-        SetTargets();
+        this.targets = parameters.levelTargets;
         objective.Begin();
-        timer.StartTimer();
+        timer.SetTimer(parameters.levelTime).StartTimer();
     }
 
     public void Reset()
     {
         timer.PauseTimer();
         objective.Nullify();
-        timer.SetTimer(LevelTools.GetLevelTime(0));
-        // TODO: despawn items if they exist
-    }
-
-    public void SetTargets()
-    {
-        this.targets = new Targets(
-            LevelTools.GetLevelTargetCount(0),
-            UnityEngine.GameObject.FindObjectsOfType<Agent>().Length,
-            0);
+        timer.SetTimer(parameters.levelTime);
     }
 
     #region EVENTS
@@ -49,8 +46,6 @@ public class Level
         Subscribe(Events.ON_TIME_STOPPED, OnTimeOver);
         Subscribe(Events.ON_OBJECTIVE_FAILED, OnObjectiveFailed);
         Subscribe(Events.ON_OBJECTIVE_COMPLETED, OnObjectiveCompleted);
-        Subscribe(Events.DO_LEVEL_BEGIN, OnLevelBegin);
-        Subscribe(Events.DO_LEVEL_RESET, OnLevelReset);
     }
 
     private void OnAgentHit((string tag, GameObject go) hit)
@@ -101,16 +96,6 @@ public class Level
             $"You saved {targets.complete} / {targets.complete + targets.available} mice",
             stars));
         Emit(Events.DO_TOGGLE_CANVAS, true);
-    }
-
-    private void OnLevelBegin()
-    {
-        Begin();
-    }
-
-    private void OnLevelReset()
-    {
-        Reset();
     }
 
     #endregion

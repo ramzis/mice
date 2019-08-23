@@ -19,7 +19,7 @@ public class Input : MonoBehaviour
     {
         if (UnityEngine.Input.GetKeyDown(KeyCode.Z))
         {
-            Emit(Events.DO_LEVEL_SETUP);
+            Emit(Events.DO_LEVEL_SETUP, 0);
         }
         if (UnityEngine.Input.GetKeyDown(KeyCode.X))
         {

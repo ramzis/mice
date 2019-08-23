@@ -36,5 +36,7 @@ public class Linker : MonoBehaviour
         canvas.timer = timer;
 
         var level = new Level(timer, objective);
+
+        var levelBuilder = new LevelBuilder(level);
     }
 }
